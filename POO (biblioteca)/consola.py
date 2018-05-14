@@ -1,6 +1,5 @@
 from clases import *
 
-
 #Biblioteca
 autor1 = Autor("0010","Antonio Recio","Español","21/05/1978")
 autor2 = Autor("0154","Manuel Murillo","Colombiano","04/04/1980")
@@ -15,7 +14,7 @@ libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación
 
 libros = [libro1,libro2,libro3,libro4]
 
-biblioteca = Biblioteca(libros,3500)
+biblioteca = Biblioteca(libros.copy(),3500)
 #Biblioteca
 
 def ingresarLibro():
@@ -42,7 +41,8 @@ def ingresarLibro():
     libro = Libro(año,editorial,edicion,copias,ISBN,palabrasClave,nombre,autor)
     biblioteca.ingresarLibro(libro)
     print()
-    print("Libro agregado con éxito")
+    print("Libro agregado")
+    print()
 
 def actualizarExistencias():
     ISBN = input("ISBN del libro: ")
@@ -52,16 +52,68 @@ def actualizarExistencias():
             esta = True
     if not esta:
         print("El libro no se encuentra en el inventario")
-
-    accion = input("¿Añadir o quitar")
-    if accion.lower() == añadir:
-        cantidad = int(input("Cantidad: "))
-    elif accion.lower() == añadir:
-        cantidad = -int(input("Cantidad: "))
     else:
-        print("Acción no indicada")
+        accion = input("¿Añadir o quitar? ")
+        if accion.lower() == "añadir":
+            libro = biblioteca.buscarLibro(ISBN)
+            biblioteca.buscarLibro(ISBN)
+            cantidad = int(input("Cantidad: "))
+            biblioteca.actualizarExistenciasLibro(cantidad,biblioteca.getLibros()[libro])
+            print()
+            print("Existencias actualizadas")
+            print()
+        elif accion.lower() == "quitar":
+            libro = biblioteca.buscarLibro(ISBN)
+            cantidad = -int(input("Cantidad: "))
+            biblioteca.actualizarExistenciasLibro(cantidad,biblioteca.getLibros()[libro])
+            print()
+            print("Existencias actualizadas")
+            print()
+        else:
+            print("Acción no indicada")
+
+def realizarPrestamo():
+    cedula = input("Cédula: ")
+    cedulaEsta = False
+    for cliente in biblioteca.getClientes():
+        if cliente.getCedula() == cedula:
+            cedulaEsta = True
+    if not cedulaEsta:
+        print("Cliente no registrado")
         return
-    biblioteca.actualizarExistenciasLibro()
+    ISBN = input("ISBN del libro: ")
+    esta = False
+    for libro in biblioteca.getLibros():
+        if libro.getISBN() == ISBN:
+            esta = True
+    if not esta:
+        print("El libro no se encuentra en el inventario")
+        return
+    biblioteca.realizarPrestamo(ISBN,cedula)
+    print()
+    print("Prestamo realizado")
+    print()
+
+def registrarCliente():
+    cedula = input("Cédula: ")
+    nombre = input("Nombre: ")
+    correo = input("Correo: ")
+    direccion = input("Dirección: ")
+    telefono = input("Teléfono: ")
+    biblioteca.registrarCliente(cedula,nombre,correo,direccion,telefono)
+    print()
+    print("Cliente registrado")
+    print()
+
+def devolverLibro():
+    cedula = input("Cédula: ")
+    devolucion = biblioteca.devolverLibro(cedula)
+    if type(devolucion) == str:
+        print("No se encontró un prestamo para el cliente indicado")
+    else:
+        print()
+        print("Libro devuelto")
+        print()
 
 def menu():
     print("Bienvenido a la biblioteca")
@@ -80,6 +132,20 @@ def menu():
         ingresarLibro()
     elif accion == "2":
         actualizarExistencias()
+    elif accion == "3":
+        realizarPrestamo()
+    elif accion == "4":
+        registrarCliente()
+    elif accion == "5":
+        devolverLibro()
 
+    repetir = ""
+    while repetir != "si" and repetir != "no":
+        repetir = input("¿Desea continuar? ").lower()
+        if repetir == "si":
+            menu()
+        elif repetir == "no":
+            print("Gracias por usar la biblioteca")
+            break
 
 menu()

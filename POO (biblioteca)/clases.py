@@ -144,15 +144,18 @@ class Biblioteca:
 
     def devolverLibro(self,cedula):
         indicePrestamo = self.buscarPrestamo(cedula)
-        prestamo = self.getPrestamos()[indicePrestamo]
-        if prestamo.getFechaEntrega() < date.today():
-            cedula = self.__prestamos[indicePrestamo].getCedula()
-            indiceCliente = self.buscarCliente(cedula)
-            self.__clientes[indiceCliente].modificarDeudas(self.__deuda)
-        self.__prestamos.pop(indicePrestamo)
-        indiceLibro = self.buscarLibro(prestamo.getISBN())
+        if type(indicePrestamo) == int:
+            prestamo = self.getPrestamos()[indicePrestamo]
+            if prestamo.getFechaEntrega() < date.today():
+                cedula = self.__prestamos[indicePrestamo].getCedula()
+                indiceCliente = self.buscarCliente(cedula)
+                self.__clientes[indiceCliente].modificarDeudas(self.__deuda)
+            self.__prestamos.pop(indicePrestamo)
+            indiceLibro = self.buscarLibro(prestamo.getISBN())
 
-        self.__libros[indiceLibro].modificarCopias(1)
+            self.__libros[indiceLibro].modificarCopias(1)
+        else:
+            return indicePrestamo
 
     def consultarLibrosAutor(self,autor):
         libros = []
