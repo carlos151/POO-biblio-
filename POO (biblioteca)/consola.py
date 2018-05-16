@@ -39,10 +39,15 @@ def ingresarLibro():
         fechaAutor = input("Fecha de nacimiento: ")
         autor = Autor(id,nombreAutor,nacionalidadAutor,fechaAutor)
     libro = Libro(año,editorial,edicion,copias,ISBN,palabrasClave,nombre,autor)
-    biblioteca.ingresarLibro(libro)
-    print()
-    print("Libro agregado")
-    print()
+    b = biblioteca.ingresarLibro(libro)
+    if type(b) == str:
+        print()
+        print("Ese libro ya existe")
+        print()
+    else:
+        print()
+        print("Libro agregado")
+        print()
 
 def actualizarExistencias():
     ISBN = input("ISBN del libro: ")
@@ -72,7 +77,7 @@ def actualizarExistencias():
         else:
             print("Acción no indicada")
 
-def realizarPrestamo():
+def realizarPrestamoAux():
     cedula = input("Cédula: ")
     cedulaEsta = False
     for cliente in biblioteca.getClientes():
@@ -89,10 +94,19 @@ def realizarPrestamo():
     if not esta:
         print("El libro no se encuentra en el inventario")
         return
-    biblioteca.realizarPrestamo(ISBN,cedula)
-    print()
-    print("Prestamo realizado")
-    print()
+    b = biblioteca.realizarPrestamo(ISBN,cedula)
+    if type(b) == int:
+        print()
+        print("No quedan copias de ese libro")
+        print()
+    elif type(b) == str:
+        print()
+        print("No se encontró ese libro")
+        print()
+    else:
+        print()
+        print("Prestamo realizado")
+        print()
 
 def registrarCliente():
     cedula = input("Cédula: ")
@@ -109,10 +123,53 @@ def devolverLibro():
     cedula = input("Cédula: ")
     devolucion = biblioteca.devolverLibro(cedula)
     if type(devolucion) == str:
+        print()
         print("No se encontró un prestamo para el cliente indicado")
+        print()
     else:
         print()
         print("Libro devuelto")
+        print()
+
+def buscarLibroPorAutor():
+    autor = input("Autor: ")
+    busqueda = biblioteca.consultarLibrosAutor(autor)
+    if busqueda == []:
+        print()
+        print("No hay libros de ese autor")
+        print()
+    else:
+        print()
+        print("Libros encontrados:")
+        for libro in busqueda:
+            print(libro)
+        print()
+
+def buscarLibroPorPalabras():
+    palabras = input("Palabras (separadas por comas): ")
+    palabras.split(",")
+    busqueda = biblioteca.consultarLibrosPalabrasClave(palabras)
+    if busqueda == []:
+        print()
+        print("No hay libros de ese autor")
+        print()
+    else:
+        print()
+        print("Libros encontrados:")
+        for libro in busqueda:
+            print(libro)
+        print()
+
+def buscarCliente():
+    cedula = input("Cédula: ")
+    busqueda = biblioteca.consultarClientes(cedula)
+    if busqueda == []:
+        print()
+        print("No se encontró al cliente")
+        print()
+    else:
+        print()
+        print(busqueda)
         print()
 
 def menu():
@@ -133,16 +190,25 @@ def menu():
     elif accion == "2":
         actualizarExistencias()
     elif accion == "3":
-        realizarPrestamo()
+        realizarPrestamoAux()
     elif accion == "4":
         registrarCliente()
     elif accion == "5":
         devolverLibro()
+    elif accion == "6":
+        buscarLibroPorAutor()
+    elif accion == "7":
+        buscarLibroPorPalabras()
+    elif accion == "8":
+        buscarCliente()
+    else:
+        print("Accion no indicada")
 
     repetir = ""
     while repetir != "si" and repetir != "no":
         repetir = input("¿Desea continuar? ").lower()
         if repetir == "si":
+            print()
             menu()
         elif repetir == "no":
             print("Gracias por usar la biblioteca")

@@ -36,6 +36,8 @@ class Libro:
 
     def modificarCopias(self,cantidad):
         self.__copias += cantidad
+        if self.__copias <= 0:
+            self.__copias = 0
 
     #accesores
     def getAño(self):
@@ -115,10 +117,16 @@ class Biblioteca:
         libro.modificarCopias(cantidad)
 
     def realizarPrestamo(self,ISBN,cedula):
-        prestamo = Prestamo(ISBN,cedula)
-        self.__prestamos.append(prestamo)
-        indiceLibro = self.buscarLibro(prestamo.getISBN())
-        self.__libros[indiceLibro].modificarCopias(-1)
+        try:
+            indiceLibro = self.buscarLibro(ISBN)
+            if self.getLibros()[indiceLibro].getCopias() > 0:
+                prestamo = Prestamo(ISBN,cedula)
+                self.__prestamos.append(prestamo)
+                self.__libros[indiceLibro].modificarCopias(-1)
+            else:
+                return 1
+        except:
+            return "Libro no encontrado"
 
     def registrarCliente(self,cedula,nombre,correo,direccion,telefono):
         cliente = Cliente(cedula,nombre,correo,direccion,telefono)
@@ -152,7 +160,6 @@ class Biblioteca:
                 self.__clientes[indiceCliente].modificarDeudas(self.__deuda)
             self.__prestamos.pop(indicePrestamo)
             indiceLibro = self.buscarLibro(prestamo.getISBN())
-
             self.__libros[indiceLibro].modificarCopias(1)
         else:
             return indicePrestamo
@@ -163,7 +170,7 @@ class Biblioteca:
         for elemento in self.__libros:
             if elemento.getAutor().getNombre().lower() == autor.lower():
                 if not elemento in libros:
-                    libros.append(elemento)
+                    libros.append(elemento.getNombre())
         return libros
 
     def consultarLibrosPalabrasClave(self,palabras):
@@ -174,14 +181,14 @@ class Biblioteca:
                 for clave in elemento.getPalabrasClave():
                     if palabra.lower() == clave.lower():
                         if not elemento in libros:
-                            libros.append(elemento)
+                            libros.append(elemento.getNombre())
         return libros
 
 
     def consultarClientes(self,cedula):
         for cliente in self.__clientes:
             if cliente.getCedula() == cedula:
-                return cliente
+                return cliente.getNombre()
 
     #accesores
     def getClientes(self):
