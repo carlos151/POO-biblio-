@@ -58,9 +58,19 @@ class RegistrarAutor:
 
     def calendario(self):
         root = Tk()
-        root.title('Ttk Calendar')
-        ttkcal = Calendar(firstweekday=calendar.SUNDAY)
-        ttkcal.pack(expand=1, fill='both')
+        root.geometry("500x600")
+
+        main = Frame(root, pady=15, padx=15)
+        main.pack(expand=True, fill="both")
+
+        Label(main, justify="left", text=__doc__).pack(anchor="w", pady=(0, 15))
+
+        Datepicker(main).pack(anchor="w")
+
+        if 'win' not in sys.platform:
+            style = ttk.Style()
+            style.theme_use('clam')
+
         root.mainloop()
 
     def onSelect(self,evt):
