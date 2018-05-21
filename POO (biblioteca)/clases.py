@@ -101,10 +101,11 @@ class Prestamo:
         return self.__fechaEntrega
 
 class Biblioteca:
-    def __init__(self,libros,deudas):
-        self.__clientes = []
+    def __init__(self,libros,deudas,clientes=[],prestamos=[],autores=[]):
+        self.__clientes = clientes
         self.__libros = libros
-        self.__prestamos = []
+        self.__prestamos = prestamos
+        self.__autores = autores
         self.__deuda = deudas
 
     def ingresarLibro(self,libro):

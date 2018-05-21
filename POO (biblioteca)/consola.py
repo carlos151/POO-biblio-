@@ -207,8 +207,8 @@ def menu():
     repetir = ""
     while repetir != "si" and repetir != "no":
         repetir = input("¿Desea continuar? ").lower()
+        print("--------------------------")
         if repetir == "si":
-            print()
             menu()
         elif repetir == "no":
             print("Gracias por usar la biblioteca")
