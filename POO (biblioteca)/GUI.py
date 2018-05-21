@@ -31,21 +31,19 @@ class RegistrarAutor:
         self.__idEntry = Entry(root,width=67)
         self.__idEntry.place(x=80,y=124)
 
-        self.__fechaEntry = Entry(root,width=46)
+        self.__fechaEntry = calendario.Datepicker(self.__root,52)
         self.__fechaEntry.place(x=170,y=164)
         self.__calOriginal = Image.open("res/calendar.png")
         self.__calResized = self.__calOriginal.resize((20, 20), Image.ANTIALIAS)
         self.__cal = ImageTk.PhotoImage(self.__calResized)
-        self.__fechaBoton = Button(root,image=self.__cal,font=("Arial","12"),height=20,width=20,command=lambda: self.calendario())
-        self.__fechaBoton.place(x=455,y=158)
 
-        self.__nacionalidadEntry = Entry(root,width=55)
+        self.__nacionalidadEntry = Entry(root,width=56)
         self.__nacionalidadEntry.place(x=115,y=203)
         self.__arrowOriginal = Image.open("res/down_arrow.png")
         self.__arrowResized = self.__arrowOriginal.resize((20,20), Image.ANTIALIAS)
         self.__arrow = ImageTk.PhotoImage(self.__arrowResized)
         self.__nacionalidadBoton = Button(root,image=self.__arrow,font=("Arial","12"),height=20,width=20,command=self.abrirLista)
-        self.__nacionalidadBoton.place(x=455,y=198)
+        self.__nacionalidadBoton.place(x=460,y=198)
 
         self.__nacionalidadLista = Listbox(root,font=("Arial","12"),height=11,width=37,selectmode=SINGLE)
         self.__nacionalidadLista.bind('<<ListboxSelect>>', self.onSelect)
@@ -55,23 +53,6 @@ class RegistrarAutor:
         self.__cancelar = Button(root,text="Cancelar",font=("Arial","12"))
         self.__aceptar.place(x=85,y=450)
         self.__cancelar.place(x=320,y=450)
-
-    def calendario(self):
-        root = Tk()
-        root.geometry("500x600")
-
-        main = Frame(root, pady=15, padx=15)
-        main.pack(expand=True, fill="both")
-
-        Label(main, justify="left", text=__doc__).pack(anchor="w", pady=(0, 15))
-
-        Datepicker(main).pack(anchor="w")
-
-        if 'win' not in sys.platform:
-            style = ttk.Style()
-            style.theme_use('clam')
-
-        root.mainloop()
 
     def onSelect(self,evt):
         w = evt.widget

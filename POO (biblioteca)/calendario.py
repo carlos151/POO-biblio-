@@ -367,7 +367,7 @@ class Datepicker(ttk.Entry):
                                        selectbackground=selectbackground, selectforeground=selectforeground,
                                        command=self._on_selected_date, on_click_month_button=lambda: self.focus())
 
-        self.bind_all("<1>", self._on_click, "+")
+        self.bind_all("<1>", self.on_click, "+")
 
         self.bind("<FocusOut>", lambda event: self._on_entry_focus_out())
         self.bind("<Escape>", lambda event: self.hide_calendar())
@@ -491,7 +491,7 @@ class Datepicker(ttk.Entry):
         if self._on_select_date_command is not None:
             self._on_select_date_command(date)
 
-    def _on_click(self, event):
+    def on_click(self, event):
         str_widget = str(event.widget)
 
         if str_widget == str(self):
