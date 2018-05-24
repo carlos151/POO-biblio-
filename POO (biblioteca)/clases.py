@@ -198,3 +198,5 @@ class Biblioteca:
         return self.__libros
     def getPrestamos(self):
         return self.__prestamos
+    def getAutores(self):
+        return self.__autores

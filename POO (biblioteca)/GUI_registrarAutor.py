@@ -4,7 +4,7 @@ import calendario
 import calendar
 from tkinter import *
 from tkinter import ttk
-from PIL import Image, ImageTk
+from PIL import ImageTk, Image
 
 class RegistrarAutor:
     def __init__(self,root):
@@ -25,20 +25,20 @@ class RegistrarAutor:
         self.__fechaLabel.place(x=10,y=160)
         self.__nacionalidadLabel.place(x=10,y=200)
 
-        self.__nombreEntry = Entry(root,width=67)
-        self.__nombreEntry.place(x=80,y=84)
+        self.__nombreEntry = Entry(root,width=50)
+        self.__nombreEntry.place(x=80,y=81)
 
-        self.__idEntry = Entry(root,width=67)
-        self.__idEntry.place(x=80,y=124)
+        self.__idEntry = Entry(root,width=50)
+        self.__idEntry.place(x=80,y=121)
 
-        self.__fechaEntry = calendario.Datepicker(self.__root,52)
-        self.__fechaEntry.place(x=170,y=164)
+        self.__fechaEntry = calendario.Datepicker(self.__root,39)
+        self.__fechaEntry.place(x=170,y=161)
         self.__calOriginal = Image.open("res/calendar.png")
         self.__calResized = self.__calOriginal.resize((20, 20), Image.ANTIALIAS)
         self.__cal = ImageTk.PhotoImage(self.__calResized)
 
-        self.__nacionalidadEntry = Entry(root,width=56)
-        self.__nacionalidadEntry.place(x=115,y=203)
+        self.__nacionalidadEntry = Entry(root,width=42)
+        self.__nacionalidadEntry.place(x=115,y=200)
         self.__arrowOriginal = Image.open("res/down_arrow.png")
         self.__arrowResized = self.__arrowOriginal.resize((20,20), Image.ANTIALIAS)
         self.__arrow = ImageTk.PhotoImage(self.__arrowResized)
@@ -49,10 +49,17 @@ class RegistrarAutor:
         self.__nacionalidadLista.bind('<<ListboxSelect>>', self.onSelect)
         self.generarNacionalidades()
 
-        self.__aceptar = Button(root,text="Aceptar",font=("Arial","12"))
-        self.__cancelar = Button(root,text="Cancelar",font=("Arial","12"))
+        self.__aceptar = Button(root,text="Aceptar",font=("Arial","12"),command=lambda: self.aceptar())
+        self.__cancelar = Button(root,text="Cancelar",font=("Arial","12"),command=lambda: self.cancelar())
         self.__aceptar.place(x=85,y=450)
         self.__cancelar.place(x=320,y=450)
+
+    def aceptar(self):
+        #falta rellenar esto
+        print("Hola mundo")
+
+    def cancelar(self):
+        self.__root.destroy()
 
     def onSelect(self,evt):
         w = evt.widget
@@ -63,7 +70,7 @@ class RegistrarAutor:
 
 
     def abrirLista(self):
-        self.__nacionalidadLista.place(x=114, y=223)
+        self.__nacionalidadLista.place(x=115, y=221)
         self.__nacionalidadBoton.configure(command=self.cerrarLista)
 
     def cerrarLista(self):
@@ -72,13 +79,31 @@ class RegistrarAutor:
 
     def generarNacionalidades(self):
         nacionalidades = paises.extraerPaises()
+        nacionalidades.sort()
         for elemento in nacionalidades:
             self.__nacionalidadLista.insert(END,elemento)
+
+    def getNombre(self):
+        return self.__nombreEntry.get()
+
+    def getID(self):
+        return self.__idEntry.get()
+
+    def getFecha(self):
+        try:
+            separarElementos = self.__fechaEntry.get().split("-")
+            año = separarElementos[0]
+            mes = separarElementos[1]
+            dia = separarElementos[2]
+            return dia + "/" + mes + "/" + año
+        except:
+            return ""
+
+    def getNacionalidad(self):
+        return self.__nacionalidadEntry.get()
 
 
 ventana = Tk()
 app = RegistrarAutor(ventana)
 ventana.mainloop()
-
-
 
