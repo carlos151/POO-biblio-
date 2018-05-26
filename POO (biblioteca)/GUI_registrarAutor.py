@@ -1,10 +1,29 @@
-import clases
+from clases import *
 import paises
 import calendario
 import calendar
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 from PIL import ImageTk, Image
+import datetime
+from datetime import date
+
+#Biblioteca
+autor1 = Autor("0010","Antonio Recio","Español","21/05/1978")
+autor2 = Autor("0154","Manuel Murillo","Colombiano","04/04/1980")
+autor3 = Autor("0576","Pedro García","Mexicano","15/07/1960")
+
+autores = [autor1,autor2,autor3]
+
+libro1 = Libro("2010","Fake Editorial","3",7,"9345",["matemática","ciencia"],"Matemática en la Ciencia",autor1)
+libro2 = Libro("2012","Not Fake Editorial","1",4,"4323",["matemática","cocina"],"Matemática en la Cocina",autor1)
+libro3 = Libro("2016","Fake Editorial","1",2,"7435",["niños","cocina"],"Cocina para niños",autor2)
+libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación"],"Computación para niños",autor3)
+
+libros = [libro1,libro2,libro3,libro4]
+
+biblioteca = Biblioteca(libros.copy(),3500,autores)
 
 class RegistrarAutor:
     def __init__(self,root):
@@ -13,9 +32,9 @@ class RegistrarAutor:
         root.title("Registrar Autor")
         root.minsize(height=500,width=500)
         root.resizable(height=False,width=False)
-        self.__canvas = Canvas(root,bg="#c1c1c1",width=500,height=70).pack(side=TOP)
+        self.__canvas = Canvas(root,bg="#efefef",width=500,height=70).pack(side=TOP)
 
-        self.__titleLabel = Label(root,bg="#c1c1c1",text="Registrar Autor",font=("Helvetica","16"))
+        self.__titleLabel = Label(root,bg="#efefef",text="Registrar Autor",font=("Helvetica","16"))
         self.__titleLabel.place(x=175,y=20)
 
         self.__nombreLabel = Label(root,bg="white",text="Nombre:",font=("Arial","12"))
@@ -56,9 +75,42 @@ class RegistrarAutor:
         self.__aceptar.place(x=90,y=450)
         self.__cancelar.place(x=300,y=450)
 
+    def _revisarFecha(self,fecha):
+        day = fecha[:2]
+        month = fecha[3:5]
+        year = fecha[6:]
+        try:
+            dayAux = int(day)
+            monthAux = int(month)
+            yearAux = int(year)
+
+        except:
+            return False
+
+        if len(day) != 2 or len(month) != 2 or len(year) != 4:
+            return False
+        elif fecha[2] != "/" or fecha[5] != "/":
+            return False
+        else:
+            return True
+
     def aceptar(self):
         #falta rellenar esto
-        print("Hola mundo")
+        id = self.getID()
+        nombre = self.getNombre()
+        nacionalidad = self.getNacionalidad()
+        fecha = self.getFecha()
+
+        if id == "" or nombre == "" or nacionalidad == "" or fecha == "":
+            messagebox.showinfo("Error","No puede haber nada en blanco")
+        elif not nacionalidad in paises.extraerPaises():
+            messagebox.showinfo("Error","Selecciones una nacionalidad de la lista")
+        elif not self._revisarFecha(fecha):
+            messagebox.showinfo("Error","Debe elegir una fecha con el calendario")
+        else:
+            autor = Autor(id,nombre,nacionalidad,fecha)
+            biblioteca.registrarAutor(autor)
+
 
     def cancelar(self):
         self.__root.destroy()
@@ -99,7 +151,7 @@ class RegistrarAutor:
             dia = separarElementos[2]
             return dia + "/" + mes + "/" + year
         except:
-            return ""
+            return self.__fechaEntry.get()
 
     def getNacionalidad(self):
         return self.__nacionalidadEntry.get()

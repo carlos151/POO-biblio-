@@ -101,7 +101,7 @@ class Prestamo:
         return self.__fechaEntrega
 
 class Biblioteca:
-    def __init__(self,libros,deudas,clientes=[],prestamos=[],autores=[]):
+    def __init__(self,libros,deudas,autores=[],clientes=[],prestamos=[]):
         self.__clientes = clientes
         self.__libros = libros
         self.__prestamos = prestamos
@@ -190,6 +190,8 @@ class Biblioteca:
         for cliente in self.__clientes:
             if cliente.getCedula() == cedula:
                 return cliente.getNombre()
+    def registrarAutor(self,autor):
+        self.__autores.append(autor)
 
     #accesores
     def getClientes(self):

@@ -14,7 +14,7 @@ libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación
 
 libros = [libro1,libro2,libro3,libro4]
 
-biblioteca = Biblioteca(libros.copy(),3500)
+biblioteca = Biblioteca(libros.copy(),3500,autores)
 #Biblioteca
 
 def ingresarLibro():
