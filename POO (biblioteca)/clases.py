@@ -4,7 +4,7 @@ from datetime import date
 import yagmail
 
 class Autor:
-    def __init__(self, nombre,id, nacionalidad, fechaNacimiento):
+    def __init__(self, id,nombre, nacionalidad, fechaNacimiento):
         self.__nombre = nombre
         self.__id = id
         self.__nacionalidad = nacionalidad
@@ -151,12 +151,11 @@ class Prestamo:
         return self.__fechaEntrega
 
 class Biblioteca:
-    def __init__(self,libros,deudas,autores=[],clientes=[],prestamos=[]):
-        self.__clientes = clientes
+    def __init__(self,libros,autores):
+        self.__clientes = []
         self.__libros = libros
-        self.__prestamos = prestamos
+        self.__prestamos = []
         self.__autores = autores
-        self.__deuda = deudas
 
         #usuario para enviar correos
         self.__correo = "tallerprogra1@gmail.com"

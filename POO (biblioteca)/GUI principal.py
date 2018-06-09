@@ -1,6 +1,4 @@
 from clases import *
-
-from clases import *
 import paises
 import calendario
 import calendar
@@ -10,9 +8,9 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 
 #Biblioteca
-autor1 = Autor("0010","Antonio Recio","Español","21/05/1978")
-autor2 = Autor("0154","Manuel Murillo","Colombiano","04/04/1980")
-autor3 = Autor("0576","Pedro García","Mexicano","15/07/1960")
+autor1 = Autor("0010","Antonio Recio","Spain","21/05/1978")
+autor2 = Autor("0154","Manuel Murillo","Colombia","04/04/1980")
+autor3 = Autor("0576","Pedro García","Mexico","15/07/1960")
 
 autores = [autor1,autor2,autor3]
 
@@ -23,7 +21,7 @@ libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación
 
 libros = [libro1,libro2,libro3,libro4]
 
-biblioteca = Biblioteca(libros.copy(),3500,autores)
+biblioteca = Biblioteca(libros.copy(),autores)
 
 
 class Main: #Ventana principal
@@ -41,7 +39,7 @@ class Main: #Ventana principal
         self.__subtitleLabel.place(x=175, y=90)
 
         #Botones
-        self.__nAutorBoton = Button(self.__root,bg="white",text="Registrar Autor",width=30,relief=RIDGE,bd=1)
+        self.__nAutorBoton = Button(self.__root,bg="white",text="Registrar Autor",width=30,relief=RIDGE,bd=1,command=lambda: self.registrarAutor())
         self.__nAutorBoton.place(x=137,y=140)
         self.__nLibroBoton = Button(self.__root, bg="white",text="Registrar Libro", width=30, relief=RIDGE, bd=1)
         self.__nLibroBoton.place(x=137, y=170)
@@ -62,8 +60,10 @@ class Main: #Ventana principal
         self.__recordatorioBoton = Button(self.__root, bg="white",text="Enviar Recordatorio Masivo", width=30, relief=RIDGE, bd=1)
         self.__recordatorioBoton.place(x=137, y=410)
 
-
-
+    def registrarAutor(self):
+        ventana = Toplevel()
+        app = RegistrarAutor(ventana)
+        ventana.mainloop()
 
 class RegistrarAutor:
     def __init__(self,root):
@@ -94,9 +94,7 @@ class RegistrarAutor:
 
         self.__fechaEntry = calendario.Datepicker(self.__root,52)
         self.__fechaEntry.place(x=170,y=161)
-        self.__calOriginal = Image.open("res/calendar.png")
-        self.__calResized = self.__calOriginal.resize((20, 20), Image.ANTIALIAS)
-        self.__cal = ImageTk.PhotoImage(self.__calResized)
+
 
         self.__nacionalidadEntry = ttk.Entry(root,width=56)
         self.__nacionalidadEntry.place(x=115,y=200)
@@ -134,6 +132,17 @@ class RegistrarAutor:
         else:
             return True
 
+    def autorRepetido(self,id,nombre,nacionalidad,fecha):
+        for autor in biblioteca.getAutores():
+            print(autor.getNombre(),nombre)
+            print(autor.getID(),id)
+            print(autor.getNacionalidad(),nacionalidad)
+            print(autor.getFechaNacimiento(),fecha)
+            print()
+            if autor.getID() == id and autor.getNombre() == nombre and autor.getNacionalidad() == nacionalidad and autor.getFechaNacimiento() == fecha:
+                return True
+        return False
+
     def aceptar(self):
         #falta rellenar esto
         id = self.getID()
@@ -148,8 +157,11 @@ class RegistrarAutor:
         elif not self._revisarFecha(fecha):
             messagebox.showinfo("Error","Debe elegir una fecha con el calendario")
         else:
-            autor = Autor(id,nombre,nacionalidad,fecha)
-            biblioteca.registrarAutor(autor)
+            if self.autorRepetido(id,nombre,nacionalidad,fecha):
+                messagebox.showinfo("Error", "Ese autor ya existe")
+            else:
+                biblioteca.registrarAutor(id,nombre,nacionalidad,fecha)
+                self.__root.destroy()
 
 
     def cancelar(self):
@@ -199,3 +211,4 @@ class RegistrarAutor:
 root = Tk()
 app = Main(root)
 root.mainloop()
+

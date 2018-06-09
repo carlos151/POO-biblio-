@@ -16,10 +16,10 @@ autor3 = Autor("0576","Pedro García","Mexicano","15/07/1960")
 
 autores = [autor1,autor2,autor3]
 
-libro1 = Libro("2010","Fake Editorial","3",7,"9345",["matemática","ciencia"],"Matemática en la Ciencia",autor1)
-libro2 = Libro("2012","Not Fake Editorial","1",4,"4323",["matemática","cocina"],"Matemática en la Cocina",autor1)
-libro3 = Libro("2016","Fake Editorial","1",2,"7435",["niños","cocina"],"Cocina para niños",autor2)
-libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación"],"Computación para niños",autor3)
+libro1 = Libro("2010","Fake Editorial","3",7,"9345",["matemática","ciencia"],"Matemática en la Ciencia",autor1,0)
+libro2 = Libro("2012","Not Fake Editorial","1",4,"4323",["matemática","cocina"],"Matemática en la Cocina",autor1,0)
+libro3 = Libro("2016","Fake Editorial","1",2,"7435",["niños","cocina"],"Cocina para niños",autor2,0)
+libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación"],"Computación para niños",autor3,0)
 
 libros = [libro1,libro2,libro3,libro4]
 
@@ -54,9 +54,7 @@ class RegistrarAutor:
 
         self.__fechaEntry = calendario.Datepicker(self.__root,52)
         self.__fechaEntry.place(x=170,y=161)
-        self.__calOriginal = Image.open("res/calendar.png")
-        self.__calResized = self.__calOriginal.resize((20, 20), Image.ANTIALIAS)
-        self.__cal = ImageTk.PhotoImage(self.__calResized)
+
 
         self.__nacionalidadEntry = ttk.Entry(root,width=56)
         self.__nacionalidadEntry.place(x=115,y=200)
@@ -157,7 +155,5 @@ class RegistrarAutor:
         return self.__nacionalidadEntry.get()
 
 
-ventana = Tk()
-app = RegistrarAutor(ventana)
-ventana.mainloop()
+
 
