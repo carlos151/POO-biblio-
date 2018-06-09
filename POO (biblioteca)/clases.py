@@ -1,20 +1,21 @@
 import datetime
 import time
 from datetime import date
+import yagmail
 
 class Autor:
-    def __init__(self,id, nombre, nacionalidad, fechaNacimiento):
-        self.__id = id
+    def __init__(self, nombre,id, nacionalidad, fechaNacimiento):
         self.__nombre = nombre
+        self.__id = id
         self.__nacionalidad = nacionalidad
         self.__fechaNacimiento = fechaNacimiento
 
     # accesores
-    def getID(self):
-        return self.__id
-
     def getNombre(self):
         return self.__nombre
+
+    def getID(self):
+        return self.__id
 
     def getNacionalidad(self):
         return self.__nacionalidad
@@ -24,15 +25,17 @@ class Autor:
 
 
 class Libro:
-    def __init__(self, año, editorial, edicion, copias, ISBN, palabrasClave, nombre, autor):
+    def __init__(self, año, editorial, edicion, copias, ISBN, palabrasClave, titulo, autor,imagen):
         self.__año = año
         self.__editorial = editorial
         self.__edicion = edicion
+        self.__copiasIniciales = copias
         self.__copias = copias
         self.__ISBN = ISBN
         self.__palabrasClave = palabrasClave
-        self.__nombre = nombre
+        self.__titulo = titulo
         self.__autor = autor
+        self.__caratula = imagen
 
     def modificarCopias(self,cantidad):
         self.__copias += cantidad
@@ -46,42 +49,89 @@ class Libro:
         return self.__editorial
     def getEdicion(self):
         return self.__edicion
+    def getCopiasIniciales(self):
+        return self.__copiasIniciales
     def getCopias(self):
         return self.__copias
     def getISBN(self):
         return self.__ISBN
     def getPalabrasClave(self):
         return self.__palabrasClave
-    def getNombre(self):
-        return self.__nombre
+    def getTitulo(self):
+        return self.__titulo
     def getAutor(self):
         return self.__autor
 
+class Direccion:
+    def __init__(self,pais,provincia,canton,distrito,señas):
+        self.__pais = pais
+        self.__provincia = provincia
+        self.__canton = canton
+        self.__distrito = distrito
+        self.__señas = señas
+
+    #accesores
+    def getPais(self):
+        return self.__pais
+    def getProvincia(self):
+        return self.__provincia
+    def getCanton(self):
+        return self.__canton
+    def getDistrito(self):
+        return self.__distrito
+    def getSeñas(self):
+        return self.__señas
+
 class Cliente:
-    def __init__(self,cedula,nombre,correo,direccion,telefono):
+    def __init__(self,cedula,nombre,pAppelido,sApellido,correo,direccion,telefono,foto):
         self.__cedula = cedula
         self.__nombre = nombre
+        self.__pApellido = pAppelido
+        self.__sApellido = sApellido
         self.__correo = correo
         self.__direccion = direccion
         self.__telefono = telefono
-        self.__deudas = 0
+        self.__foto = foto
+        self.__prestamos = []
 
-    def modificarDeudas(self,cantidad):
-        self.__deudas += cantidad
+    def todoAlDia(self):
+        for prestamo in self.__prestamos:
+            if self.calcularDeuda(prestamo) > 0:
+                return False
+        return True
+
+    def calcularDeuda(self,prestamo):
+        diferencia = prestamo.getFechaEntrega() - date.today()
+        if diferencia > 0:
+            return diferencia * 500
+        else:
+            return 0
+
+    def eliminarPrestamo(self,prestamo):
+        self.__prestamos.remove(prestamo)
+
+    def añadirLibro(self,libro):
+        self.__prestamos.append(libro)
 
     #accesores
     def getCedula(self):
         return self.__cedula
     def getNombre(self):
         return self.__nombre
+    def getApellido1(self):
+        return self.__pApellido
+    def getApellido2(self):
+        return self.__sApellido
     def getCorreo(self):
         return self.__correo
     def getDireccion(self):
         return self.__direccion
     def getTelefono(self):
         return self.__telefono
-    def getDeudas(self):
-        return self.__deudas
+    def getFoto(self):
+        return self.__foto
+    def getPrestamo(self):
+        return self.__prestamos
 
 class Prestamo:
     def __init__(self,ISBN,cedula):
@@ -108,6 +158,10 @@ class Biblioteca:
         self.__autores = autores
         self.__deuda = deudas
 
+        #usuario para enviar correos
+        self.__correo = "tallerprogra1@gmail.com"
+        self.__password = "pass123456"
+
     def ingresarLibro(self,libro):
         if not libro in self.__libros:
             self.__libros.append(libro)
@@ -117,31 +171,84 @@ class Biblioteca:
     def actualizarExistenciasLibro(self,cantidad,libro):
         libro.modificarCopias(cantidad)
 
-    def realizarPrestamo(self,ISBN,cedula):
-        try:
-            indiceLibro = self.buscarLibro(ISBN)
-            if self.getLibros()[indiceLibro].getCopias() > 0:
-                prestamo = Prestamo(ISBN,cedula)
-                self.__prestamos.append(prestamo)
-                self.__libros[indiceLibro].modificarCopias(-1)
-            else:
-                return 1
-        except:
-            return "Libro no encontrado"
+    def formatoFechas(self,fecha):
+        separarElementos = fecha.split("-")
+        year = separarElementos[0]
+        mes = separarElementos[1]
+        dia = separarElementos[2]
+        return dia + "/" + mes + "/" + year
 
-    def registrarCliente(self,cedula,nombre,correo,direccion,telefono):
-        cliente = Cliente(cedula,nombre,correo,direccion,telefono)
+    def enviarCorreo(self,correo,contraseña,destino,asunto,mensaje):
+        yag = yagmail.SMTP(correo, contraseña)
+        yag.send(destino, asunto, mensaje)
+
+    def realizarPrestamo(self,ISBN,cedula):
+        if self.__clientes[self.buscarCliente(cedula)].todoAlDia:
+            try:
+                indiceLibro = self.buscarLibro(ISBN)
+                if self.getLibros()[indiceLibro].getCopias() > 0:
+                    prestamo = Prestamo(ISBN,cedula)
+                    self.__prestamos.append(prestamo)
+                    self.__libros[indiceLibro].modificarCopias(-1)
+                    pISBN = prestamo.getISBN()
+                    pCedula = prestamo.getCedula()
+                    pFecha =self.formatoFechas(str(prestamo.getFechaPrestamo()))
+                    pEntrega =self.formatoFechas(str(prestamo.getFechaEntrega()))
+                    mensaje = "ISBN: " + pISBN + "\n"
+                    mensaje += "Cédula: " + pCedula + "\n"
+                    mensaje += "Fecha del préstamo: " + pFecha + "\n"
+                    mensaje += "Fecha de entrega: " + pEntrega
+                    destino = self.__clientes[self.buscarCliente(cedula)].getCorreo()
+                    try:
+                        self.enviarCorreo(self.__correo,self.__password,destino,"Detalles de préstamo",mensaje)
+                    except:
+                        return 0
+
+                else:
+                    return 1
+            except:
+                return "Libro no encontrado"
+        else:
+            return False
+
+    def enviarRecordatorio(self):
+        for cliente in self.__clientes:
+            if cliente.todoAlDia():
+                if cliente.getPrestamo() != []:
+                    for prestamo in cliente.getPrestamo():
+                        if prestamo.getFechaEntrega() > date.today():
+                            pISBN = prestamo.getISBN()
+                            pCedula = prestamo.getCedula()
+                            pFecha = self.formatoFechas(str(prestamo.getFechaPrestamo()))
+                            pEntrega = self.formatoFechas(str(prestamo.getFechaEntrega()))
+                            mensaje = "ISBN: " + pISBN + "\n"
+                            mensaje += "Cédula: " + pCedula + "\n"
+                            mensaje += "Fecha del préstamo: " + pFecha + "\n"
+                            mensaje += "Fecha de entrega: " + pEntrega + "\n"
+                            mensaje += "Monto: " + str(cliente.calcularDeuda(prestamo))
+                            destino = self.__clientes[self.buscarCliente(cliente.getCedula())].getCorreo()
+                            try:
+                                self.enviarCorreo(self.__correo, self.__password, destino, "Detalles de préstamo", mensaje)
+                            except:
+                                return False
+                        else:
+                            continue
+                else:
+                    continue
+
+    def registrarCliente(self,cedula,nombre,pApellido,sApellido,correo,direccion,telefono,foto):
+        cliente = Cliente(cedula,nombre,pApellido,sApellido,correo,direccion,telefono,foto)
         self.__clientes.append(cliente)
 
-    def buscarPrestamo(self,cedula):
+    def buscarPrestamo(self,prestamo):
         for i in range(len(self.__prestamos)):
-            if self.__prestamos[i].getCedula() == cedula:
+            if self.__prestamos[i].getCedula() == prestamo.getCedula():
                 return i
         return "Prestamo no encontrado"
 
-    def buscarLibro(self,ISBM):
+    def buscarLibro(self,ISBN):
         for i in range(len(self.__libros)):
-            if self.__libros[i].getISBN() == ISBM:
+            if self.__libros[i].getISBN() == ISBN:
                 return i
         return "Libro no encontrado"
 
@@ -151,25 +258,49 @@ class Biblioteca:
                 return i
         return "Cliente no encontrado"
 
-    def devolverLibro(self,cedula):
-        indicePrestamo = self.buscarPrestamo(cedula)
+    def devolverLibro(self,prestamo):
+        indicePrestamo = self.buscarPrestamo(prestamo)
         if type(indicePrestamo) == int:
+            #eliminar prestamo de la biblioteca
             prestamo = self.getPrestamos()[indicePrestamo]
-            if prestamo.getFechaEntrega() < date.today():
-                cedula = self.__prestamos[indicePrestamo].getCedula()
-                indiceCliente = self.buscarCliente(cedula)
-                self.__clientes[indiceCliente].modificarDeudas(self.__deuda)
             self.__prestamos.pop(indicePrestamo)
             indiceLibro = self.buscarLibro(prestamo.getISBN())
             self.__libros[indiceLibro].modificarCopias(1)
+            #eliminar prestamo del cliente
+            cedula = self.__prestamos[indicePrestamo].getCedula()
+            indiceCliente = self.buscarCliente(cedula)
+            deuda = self.__clientes[indiceCliente].calcularDeuda(self.__prestamos[indicePrestamo])
+            return deuda
+
         else:
             return indicePrestamo
+
+    def eliminarLibro(self,ISBN):
+        libro = self.buscarLibro(ISBN)
+        if libro.getCopiasIniciales <= libro.getCopias:
+            self.__libros.remove(libro)
+        else:
+            return False
+
+    def cosultarLibroISBN(self,ISBN):
+        for libro in self.__libros:
+            if libro.getISBN() == ISBN:
+                return libro
 
     def consultarLibrosAutor(self,autor):
         libros = []
 
         for elemento in self.__libros:
             if elemento.getAutor().getNombre().lower() == autor.lower():
+                if not elemento in libros:
+                    libros.append(elemento.getNombre())
+        return libros
+
+    def consultarLibrosEditorial(self,editorial):
+        libros = []
+
+        for elemento in self.__libros:
+            if elemento.getEditorial.lower() == editorial.lower():
                 if not elemento in libros:
                     libros.append(elemento.getNombre())
         return libros
@@ -189,9 +320,12 @@ class Biblioteca:
     def consultarClientes(self,cedula):
         for cliente in self.__clientes:
             if cliente.getCedula() == cedula:
-                return cliente.getNombre()
-    def registrarAutor(self,autor):
+                return cliente
+
+    def registrarAutor(self,nombre,id,nacionalidad,fechaNacimiento):
+        autor = Autor(nombre,id,nacionalidad,fechaNacimiento)
         self.__autores.append(autor)
+
 
     #accesores
     def getClientes(self):
