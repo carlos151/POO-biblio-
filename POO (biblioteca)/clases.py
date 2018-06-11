@@ -83,7 +83,7 @@ class Direccion:
         return self.__señas
 
 class Cliente:
-    def __init__(self,cedula,nombre,pAppelido,sApellido,correo,direccion,telefono,foto):
+    def __init__(self,cedula,nombre,pAppelido,sApellido,correo,direccion,telefono,image):
         self.__cedula = cedula
         self.__nombre = nombre
         self.__pApellido = pAppelido
@@ -91,7 +91,7 @@ class Cliente:
         self.__correo = correo
         self.__direccion = direccion
         self.__telefono = telefono
-        self.__foto = foto
+        self.__foto = image
         self.__prestamos = []
 
     def todoAlDia(self):
@@ -110,8 +110,8 @@ class Cliente:
     def eliminarPrestamo(self,prestamo):
         self.__prestamos.remove(prestamo)
 
-    def añadirLibro(self,libro):
-        self.__prestamos.append(libro)
+    def añadirPrestamo(self,prestamo):
+        self.__prestamos.append(prestamo)
 
     #accesores
     def getCedula(self):
@@ -140,6 +140,12 @@ class Prestamo:
         self.__fechaPrestamo = date.today()
         self.__fechaEntrega = self.__fechaPrestamo + datetime.timedelta(days=15)
 
+    def getNombre(self):
+        libros = Biblioteca.getLibros()
+        for libro in libros:
+            if libro.getISBN() == self.__ISBN:
+                return libro.getNombre()
+
     #accesores
     def getISBN(self):
         return self.__ISBN
@@ -151,8 +157,8 @@ class Prestamo:
         return self.__fechaEntrega
 
 class Biblioteca:
-    def __init__(self,libros,autores):
-        self.__clientes = []
+    def __init__(self,libros,autores,clientes=[]):
+        self.__clientes = clientes
         self.__libros = libros
         self.__prestamos = []
         self.__autores = autores
@@ -188,6 +194,7 @@ class Biblioteca:
                 if self.getLibros()[indiceLibro].getCopias() > 0:
                     prestamo = Prestamo(ISBN,cedula)
                     self.__prestamos.append(prestamo)
+                    self.__clientes[self.buscarCliente(cedula)].añadirPrestamo(prestamo)
                     self.__libros[indiceLibro].modificarCopias(-1)
                     pISBN = prestamo.getISBN()
                     pCedula = prestamo.getCedula()
