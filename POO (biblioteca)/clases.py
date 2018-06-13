@@ -140,11 +140,11 @@ class Prestamo:
         self.__fechaPrestamo = date.today()
         self.__fechaEntrega = self.__fechaPrestamo + datetime.timedelta(days=15)
 
-    def getNombre(self):
-        libros = Biblioteca.getLibros()
+    def getNombre(self,biblioteca):
+        libros = Biblioteca.getLibros(biblioteca)
         for libro in libros:
             if libro.getISBN() == self.__ISBN:
-                return libro.getNombre()
+                return libro.getTitulo()
 
     #accesores
     def getISBN(self):
@@ -188,6 +188,8 @@ class Biblioteca:
         yag.send(destino, asunto, mensaje)
 
     def realizarPrestamo(self,ISBN,cedula):
+        if type(self.buscarCliente(cedula)) == str:
+            return -1
         if self.__clientes[self.buscarCliente(cedula)].todoAlDia:
             try:
                 indiceLibro = self.buscarLibro(ISBN)

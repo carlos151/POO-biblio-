@@ -21,7 +21,7 @@ lector1 = Cliente("3242","Chuck","Norris","Ortiz","carlos1512000@gmail.com",dire
 lectores = [lector1]
 
 libro1 = Libro("2010","Fake Editorial","3",7,"9345",["matemática","ciencia"],"Matemática en la Ciencia",autor1,0)
-libro2 = Libro("2012","Not Fake Editorial","1",4,"4323",["matemática","cocina"],"Matemática en la Cocina",autor1,0)
+libro2 = Libro("2012","Not Fake Editorial","1",0,"4323",["matemática","cocina"],"Matemática en la Cocina",autor1,0)
 libro3 = Libro("2016","Fake Editorial","1",2,"7435",["niños","cocina"],"Cocina para niños",autor2,0)
 libro4 = Libro("2008","Fake Editorial 2.0","6",9,"3278",["niños","commputación"],"Computación para niños",autor3,0)
 
@@ -59,7 +59,7 @@ class Main: #Ventana principal
         self.__eliminarISBNBoton.place(x=137, y=290)
         self.__infoLectorBoton = Button(self.__root, bg="white",text="Consultar Información de Lector", width=30, relief=RIDGE, bd=1,command=lambda : self.consultarInfoLector())
         self.__infoLectorBoton.place(x=137, y=320)
-        self.__prestamoBoton = Button(self.__root, bg="white",text="Realizar Préstamo", width=30, relief=RIDGE, bd=1)
+        self.__prestamoBoton = Button(self.__root, bg="white",text="Realizar Préstamo", width=30, relief=RIDGE, bd=1,command= lambda: self.realizarPrestamo())
         self.__prestamoBoton.place(x=137, y=350)
         self.__devolverBoton = Button(self.__root, bg="white",text="Realizar Devolución", width=30, relief=RIDGE, bd=1)
         self.__devolverBoton.place(x=137, y=380)
@@ -74,6 +74,11 @@ class Main: #Ventana principal
     def consultarInfoLector(self):
         ventana = Toplevel()
         app = InfoLector(ventana)
+        ventana.mainloop()
+
+    def realizarPrestamo(self):
+        ventana = Toplevel()
+        app = RealizarPrestamo(ventana)
         ventana.mainloop()
 
     def enviarRecordatorio(self):
@@ -160,7 +165,6 @@ class RegistrarAutor:
         return False
 
     def aceptar(self):
-        #falta rellenar esto
         id = self.getID()
         nombre = self.getNombre()
         nacionalidad = self.getNacionalidad()
@@ -220,6 +224,44 @@ class RegistrarAutor:
     def getNacionalidad(self):
         return self.__nacionalidadEntry.get()
 
+class RealizarPrestamo:
+    def __init__(self,root):
+        self.__root = root
+        self.__root.config(bg="white")
+        root.title("Realizar Préstamo")
+        root.minsize(height=80, width=300)
+        root.resizable(height=False, width=False)
+
+        self.__cedulaLabel = Label(self.__root,text="Cédula",bg="white").place(x=10,y=20)
+        self.__cedulaEntry = Entry(self.__root,width=37,bg="white")
+        self.__cedulaEntry.place(x=55,y=21)
+        self.__ISBN_Label =  Label(self.__root,text="ISBN",bg="white").place(x=13,y=60)
+        self.__ISBN_Entry = Entry(self.__root,width=37,bg="white")
+        self.__ISBN_Entry.place(x=55,y=61)
+        self.__aceptar = Button(self.__root, text="Aceptar", width=15, relief=RIDGE, bd=1, bg="white",command=lambda: self.aceptar()).place(x=30, y=165)
+        self.__cerrar = Button(self.__root, text="Cerrar", width=15, relief=RIDGE, bd=1, bg="white",command=lambda: self.__root.destroy()).place(x=165, y=165)
+
+    def aceptar(self):
+        ISBN = self.__ISBN_Entry.get()
+        cedula = self.__cedulaEntry.get()
+        if ISBN == "" or cedula == "":
+            messagebox.showerror("Error", "No puede dejar nada en blanco")
+            return
+        x = biblioteca.realizarPrestamo(ISBN,cedula)
+        if x == 0:
+            messagebox.showerror("Error","Hubo un error al envíar el correo")
+        elif x == -1:
+            messagebox.showerror("Error", "Cliente no encontrado")
+        elif x == 1:
+            messagebox.showinfo("Info", "No quedan copias de ese libro")
+        elif type(x) == str:
+            messagebox.showerror("Error", x)
+        elif x == False:
+            messagebox.showinfo("Info", "El cliente no tiene todos los prestamos al día")
+        else:
+            messagebox.showinfo("Éxito", "Préstamo realizado con éxito")
+            self.__root.destroy()
+
 class InfoLector:
     def __init__(self,root):
         self.__root = root
@@ -257,29 +299,41 @@ class InfoLector:
         direccion = Button(self.__root,text="Dirección",width=15,relief=RIDGE,anchor="w",bd=0,bg="white",command=lambda:self.direccion(cliente.getDireccion()))
         direccion.place(x=175,y=50)
         telefono = Label(self.__root,text="Teléfono: " + cliente.getTelefono(),bg="white").place(x=175,y=70)
-        prestamos = []
+        self.__prestamos = []
         for prestamo in cliente.getPrestamo():
-            prestamos.append(prestamo)
-        if prestamos == []:
-            prestamos = "No tiene prestamos"
+            self.__prestamos.append(prestamo)
+        if self.__prestamos == []:
+            self.__prestamos = "No tiene prestamos"
         prestamosLabel = Label(self.__root,text="Préstamos",bg="white").place(x=175,y=198)
-        prestamosLista = Listbox(self.__root,width=63,height=15,bg="white")
-        if type(prestamos) == list:
-            for prestamo in prestamos:
-                prestamosLista.insert(END,prestamo.getNombre())
-            prestamosLista.bind('<<ListboxSelect>>', lambda: self.abrirPrestamo(prestamosLista.get(ACTIVE)))
-            prestamosLista.bind('<MouseWheel>', lambda event, arg=prestamos: self.MouseWheel(event))
+        self.__prestamosLista = Listbox(self.__root,width=63,height=15,bg="white")
+        if type(self.__prestamos) == list:
+            for prestamo in self.__prestamos:
+                self.__prestamosLista.insert(END,prestamo.getNombre(biblioteca))
+            self.__prestamosLista.bind('<<ListboxSelect>>',lambda x=self:self.abrirPrestamo())
+            self.__prestamosLista.bind('<MouseWheel>', lambda event: self.MouseWheel(event))
         else:
-            prestamosLista.insert(END, prestamos)
-        prestamosLista.place(x=10,y=220)
+            self.__prestamosLista.insert(END, self.__prestamos)
+        self.__prestamosLista.place(x=10,y=220)
 
 
-    def abrirPrestamo(self,prestamo):
+    def abrirPrestamo(self):
+        cliente = biblioteca.buscarCliente(self.__cedulaEntry.get())
+        nombre = self.__prestamosLista.get(ACTIVE)
+        for elemento in self.__prestamos:
+            if elemento.getNombre(biblioteca) == nombre:
+                prestamo = elemento
         ventana = Tk()
         ventana.configure(bg="white")
         ventana.resizable(height=False, width=False)
         ventana.minsize(height=80, width=400)
-        ventana.title("Prestamo: " + prestamo.getNombre())
+        ventana.title("Prestamo: " + prestamo.getNombre(biblioteca))
+        pISBN = prestamo.getISBN()
+        pCedula = prestamo.getCedula()
+        pFecha = self.formatoFechas(str(prestamo.getFechaPrestamo()))
+        pEntrega = self.formatoFechas(str(prestamo.getFechaEntrega()))
+        monto = cliente.calcularDeuda(prestamo)
+
+
 
 
     def MouseWheel(event, arg):  # Función para añadir la función de scroll
@@ -306,7 +360,7 @@ class InfoLector:
         cerrar = Button(ventana,text="Cerrar",width=15,relief=RIDGE,bd=1,bg="white",command=lambda: ventana.destroy()).place(x=140,y=160)
         ventana.mainloop()
 
-#class RealizarPrestamo:
+
 
 
 
