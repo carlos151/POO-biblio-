@@ -248,16 +248,16 @@ class RealizarPrestamo:
             messagebox.showerror("Error", "No puede dejar nada en blanco")
             return
         x = biblioteca.realizarPrestamo(ISBN,cedula)
-        if x == 0:
-            messagebox.showerror("Error","Hubo un error al envíar el correo")
+        if x == False:
+            messagebox.showinfo("Info", "El cliente no tiene todos los prestamos al día")
         elif x == -1:
             messagebox.showerror("Error", "Cliente no encontrado")
         elif x == 1:
             messagebox.showinfo("Info", "No quedan copias de ese libro")
         elif type(x) == str:
             messagebox.showerror("Error", x)
-        elif x == False:
-            messagebox.showinfo("Info", "El cliente no tiene todos los prestamos al día")
+        elif x == 2:
+            messagebox.showerror("Error", "Hubo un error al envíar el correo")
         else:
             messagebox.showinfo("Éxito", "Préstamo realizado con éxito")
             self.__root.destroy()
@@ -275,6 +275,8 @@ class InfoLector:
         self.__cedulaEntry.place(x=106,y=51)
         self.__buscar = Button(self.__root,text="Buscar",bg="white",bd=1,width=15,relief=RIDGE,command=lambda: self.buscar(self.__cedulaEntry.get()))
         self.__buscar.place(x=139,y=75)
+
+        self.__root.mainloop()
 
     def buscar(self,cedula):
         for cliente in biblioteca.getClientes():
@@ -309,15 +311,16 @@ class InfoLector:
         if type(self.__prestamos) == list:
             for prestamo in self.__prestamos:
                 self.__prestamosLista.insert(END,prestamo.getNombre(biblioteca))
-            self.__prestamosLista.bind('<<ListboxSelect>>',lambda x=self:self.abrirPrestamo())
+            self.__prestamosLista.bind('<<ListboxSelect>>',lambda x=self:self.abrirPrestamo(cliente.getCedula()))
             self.__prestamosLista.bind('<MouseWheel>', lambda event: self.MouseWheel(event))
         else:
             self.__prestamosLista.insert(END, self.__prestamos)
         self.__prestamosLista.place(x=10,y=220)
 
 
-    def abrirPrestamo(self):
-        cliente = biblioteca.buscarCliente(self.__cedulaEntry.get())
+    def abrirPrestamo(self,cedula):
+        clienteIndice = biblioteca.buscarCliente(cedula)
+        cliente = biblioteca.getClientes()[clienteIndice]
         nombre = self.__prestamosLista.get(ACTIVE)
         for elemento in self.__prestamos:
             if elemento.getNombre(biblioteca) == nombre:
@@ -329,12 +332,17 @@ class InfoLector:
         ventana.title("Prestamo: " + prestamo.getNombre(biblioteca))
         pISBN = prestamo.getISBN()
         pCedula = prestamo.getCedula()
-        pFecha = self.formatoFechas(str(prestamo.getFechaPrestamo()))
-        pEntrega = self.formatoFechas(str(prestamo.getFechaEntrega()))
+        pFecha = biblioteca.formatoFechas(str(prestamo.getFechaPrestamo()))
+        pEntrega = biblioteca.formatoFechas(str(prestamo.getFechaEntrega()))
         monto = cliente.calcularDeuda(prestamo)
+        ISBN = Label(ventana,text="ISBN: " + pISBN,bg="white").place(x=10,y=20)
+        cedula = Label(ventana,text="Cédula: " + pCedula,bg="white").place(x=10,y=50)
+        fecha = Label(ventana,text="Fecha de préstamo: " + pFecha,bg="white").place(x=10,y=80)
+        entrega = Label(ventana,text="Fecha de entrega: " + pEntrega,bg="white").place(x=10,y=110)
+        if monto != 0:
+            deuda = Label(ventana,text="Monto: " + str(monto) + " colones",bg="white").place(x=10,y=140)
 
-
-
+        ventana.mainloop()
 
     def MouseWheel(event, arg):  # Función para añadir la función de scroll
         for lista in arg:

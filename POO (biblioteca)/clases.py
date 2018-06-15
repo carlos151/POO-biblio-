@@ -96,14 +96,15 @@ class Cliente:
 
     def todoAlDia(self):
         for prestamo in self.__prestamos:
-            if self.calcularDeuda(prestamo) > 0:
+            if self.calcularDeuda(prestamo) < 0:
                 return False
         return True
 
     def calcularDeuda(self,prestamo):
         diferencia = prestamo.getFechaEntrega() - date.today()
-        if diferencia > 0:
-            return diferencia * 500
+        resta = int(str(diferencia).split(" ")[0])
+        if resta < 0:
+            return abs(resta * 500)
         else:
             return 0
 
@@ -190,7 +191,7 @@ class Biblioteca:
     def realizarPrestamo(self,ISBN,cedula):
         if type(self.buscarCliente(cedula)) == str:
             return -1
-        if self.__clientes[self.buscarCliente(cedula)].todoAlDia:
+        if self.__clientes[self.buscarCliente(cedula)].todoAlDia():
             try:
                 indiceLibro = self.buscarLibro(ISBN)
                 if self.getLibros()[indiceLibro].getCopias() > 0:
@@ -210,7 +211,7 @@ class Biblioteca:
                     try:
                         self.enviarCorreo(self.__correo,self.__password,destino,"Detalles de préstamo",mensaje)
                     except:
-                        return 0
+                        return 2
 
                 else:
                     return 1
